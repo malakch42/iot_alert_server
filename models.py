@@ -5,8 +5,8 @@ from datetime import datetime
 def get_connection():
     return mysql.connector.connect(
         host="localhost",
-        user="malak",        # Remplace si tu utilises un autre utilisateur
-        password="malak2004",        # Mets ton mot de passe MySQL si nécessaire
+        user="malak",               # Ton utilisateur MySQL
+        password="malak2004",       # Ton mot de passe MySQL
         database="iot_alerts"
     )
 
@@ -21,29 +21,27 @@ def enregistrer_alerte(type_alerte, valeur):
     cursor.close()
     conn.close()
 
-# Fonction pour récupérer toutes les alertes
+# Fonction pour récupérer toutes les alertes (sous forme de dictionnaires)
 def get_all_alertes():
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)  # ← Important !
     cursor.execute("SELECT id, type, valeur, timestamp FROM alertes ORDER BY timestamp DESC")
     alertes = cursor.fetchall()
     cursor.close()
     conn.close()
     return alertes
 
-#filtrage 
-
+# Fonction pour récupérer des alertes filtrées par type
 def get_filtered_alertes(type_alerte=None):
     conn = get_connection()
-    cursor = conn.cursor()
-
+    cursor = conn.cursor(dictionary=True)  # ← Important aussi ici !
+    
     if type_alerte:
-        cursor.execute("SELECT * FROM alertes WHERE type = %s", (type_alerte,))
+        cursor.execute("SELECT id, type, valeur, timestamp FROM alertes WHERE type = %s ORDER BY timestamp DESC", (type_alerte,))
     else:
-        cursor.execute("SELECT * FROM alertes")
-
+        cursor.execute("SELECT id, type, valeur, timestamp FROM alertes ORDER BY timestamp DESC")
+    
     alertes = cursor.fetchall()
     cursor.close()
     conn.close()
     return alertes
-
